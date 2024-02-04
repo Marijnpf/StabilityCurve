@@ -1,0 +1,39 @@
+# from seaborn dark
+legend.frameon: False
+legend.numpoints: 1
+legend.scatterpoints: 1
+xtick.direction: out
+ytick.direction: out
+#xtick.color: #2A3459
+#ytick.color: #2A3459
+axes.axisbelow: True
+axes.grid: True
+font.family: sans-serif
+font.sans-serif: Arial, Liberation Sans, DejaVu Sans, Bitstream Vera Sans, sans-serif
+grid.linestyle: -
+lines.solid_capstyle: round
+axes.linewidth: 0
+xtick.major.size: 0
+ytick.major.size: 0
+xtick.minor.size: 0
+ytick.minor.size: 0
+
+
+# Colors
+axes.prop_cycle: cycler('color', ['C81D25', 'F2BB05', '251351', '21FA90', 'EB4511'])
+
+image.cmap: cool
+
+# font color: Jet
+text.color: 3E363F
+axes.labelcolor: 3E363F
+xtick.color: 3E363F
+ytick.color: 3E363F
+
+# background: Ivory
+figure.facecolor: FFFFFF #FFFCE8
+axes.facecolor: FFFFFF #FFFCE8
+savefig.facecolor: FFFFFF #FFFCE8
+
+# grid: Cadet grey
+grid.color: F5F3F4 #A2AEBB

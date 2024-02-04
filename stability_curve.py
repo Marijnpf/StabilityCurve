@@ -9,6 +9,13 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from matplotlib.animation import FuncAnimation
 
+# Color codes for plotting
+COLORS = {'light blue': '#B7D5D4',
+          'tropical indigo': '#7D83FF',
+          'field drab': '#65532F',
+          'licorice': '#120309',
+          'pacific cyan': '#23B5D3'}
+
 
 def change_sign(
         lst: list[Union[float, int]]
@@ -76,6 +83,7 @@ class Vessel:
 
         fig, ax = plt.subplots(1, 2, figsize=(12, 6))
         margin = 10
+        plt.style.use('data/style_light.mplstyle')
 
         def update(frame):
             cross_section = self.cross_section_history[frame][0]
@@ -84,30 +92,28 @@ class Vessel:
 
             ax[0].clear()
             ax[0].plot(self.righting_arm_history[0], self.righting_arm_history[1])
-            ax[0].scatter(self.righting_arm_history[0][frame], self.righting_arm_history[1][frame], color='red')
-            ax[0].axhline(0, color='black', linestyle='dashed')
+            ax[0].scatter(self.righting_arm_history[0][frame], self.righting_arm_history[1][frame], color=COLORS['pacific cyan'])
+            ax[0].axhline(0, color=COLORS['licorice'], linestyle='dashed')
             ax[0].set_xlabel('Heeling angle [deg]')
             ax[0].set_ylabel('Righting arm [m]')
             ax[0].grid(True)
 
             ax[1].clear()  # clearing the axes
-            ax[1].plot(cross_section.discrete[0][:, 1] / 1e3, cross_section.discrete[0][:, 0] / 1e3, color='black')
-            ax[1].axhline(self.draft)
+            ax[1].plot(cross_section.discrete[0][:, 1] / 1e3, cross_section.discrete[0][:, 0] / 1e3, color=COLORS['licorice'])
+            ax[1].axhline(self.draft, color=COLORS['pacific cyan'])
             ax[1].scatter(center_of_gravity[1], center_of_gravity[2], label='G')
             ax[1].text(center_of_gravity[1] - 0.6, center_of_gravity[2] + 0.6, 'G')
             ax[1].scatter(center_of_buoyancy[1], center_of_buoyancy[2], label='B')
             ax[1].text(center_of_buoyancy[1] - 0.6, center_of_buoyancy[2] + 0.6, 'B')
-            ax[1].set_xlim(-self.breadth / 2 - margin, self.breadth / 2 + margin)  # Set x-axis limits
-            ax[1].set_ylim(-self.breadth / 2 - margin, self.breadth / 2 + margin + self.draft)  # Set y-axis limits
+            ax[1].set_xlim(-self.breadth / 2 - margin, self.breadth / 2 + margin)
+            ax[1].set_ylim(-self.breadth / 2 - margin, self.breadth / 2 + margin + self.draft)
             ax[1].grid(False)
             ax[1].set_aspect('equal', adjustable="datalim")
-            # plt.suptitle('Test', size=12)
-            fig.canvas.draw()  # forcing the artist to redraw itself
+            plt.suptitle('righting arm curve'.title(), size=16 ,fontweight='bold')
+            fig.canvas.draw()
 
-        # plt.tight_layout()
         animation = FuncAnimation(fig, update, frames=range(len(self.cross_section_history)), interval=50)
-        # To save the animation as a GIF, you can use the following line
-        # animation.save('stability curve.gif', writer='pillow')
+        animation.save('data/stability curve.gif', writer='pillow')
         plt.show()
 
     def stability_curve(self, heeling_range: list, increment: float):
