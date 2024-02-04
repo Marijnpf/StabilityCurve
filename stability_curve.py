@@ -14,7 +14,8 @@ COLORS = {'light blue': '#B7D5D4',
           'tropical indigo': '#7D83FF',
           'field drab': '#65532F',
           'licorice': '#120309',
-          'pacific cyan': '#23B5D3'}
+          'pacific cyan': '#23B5D3',
+          'fire red': '#C81D25'}
 
 
 def change_sign(
@@ -44,6 +45,7 @@ class Vessel:
         self.center_of_buoyancy = self.underwater_vessel.center_mass * 1e-3  # [m]
         self.GZt = self.center_of_buoyancy[1] - self.center_of_gravity[1]  # Horizontal distance between B and G
 
+        self.mesh_history=[]
         self.cross_section_history = []
         self.righting_arm_history = []
 
@@ -78,6 +80,7 @@ class Vessel:
         self.GZt = self.center_of_buoyancy[1] - self.center_of_gravity[1]  # Horizontal distance between B and G
 
         self.cross_section_history.append(self.cross_section([self.length/2 * 1e3, 0, 0]))
+        self.mesh_history.append([self.abovewater_vessel, self.underwater_vessel])
 
     def animate_cross_section(self):
 
@@ -109,7 +112,7 @@ class Vessel:
             ax[1].set_ylim(-self.breadth / 2 - margin, self.breadth / 2 + margin + self.draft)
             ax[1].grid(False)
             ax[1].set_aspect('equal', adjustable="datalim")
-            plt.suptitle('righting arm curve'.title(), size=16 ,fontweight='bold')
+            plt.suptitle('righting arm curve and vessel cross-section'.title(), size=16 ,fontweight='bold')
             fig.canvas.draw()
 
         animation = FuncAnimation(fig, update, frames=range(len(self.cross_section_history)), interval=50)
@@ -172,6 +175,25 @@ class Vessel:
                                                 plane_normal=plane_normal)
 
         return [cross_section, self.center_of_gravity, self.center_of_buoyancy]
+
+    def animate_3d_mesh(self) -> None:
+        plt.style.use('data/style_light.mplstyle')
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        colors = [COLORS['fire red'], COLORS['light blue']]
+
+        def update(frame):
+            ax.clear()
+            # ax.view_init(elev=15, azim=215)  # Set the elevation and azimuthal angle
+            for i, mesh_obj in enumerate(self.mesh_history[frame]):
+                ax.plot_trisurf(mesh_obj.vertices[:, 0], mesh_obj.vertices[:, 1], triangles=mesh_obj.faces,
+                                Z=mesh_obj.vertices[:, 2], color=colors[i])
+            set_axes_equal(ax)
+
+        animation = FuncAnimation(fig, update, frames=range(len(self.mesh_history)), interval=50)
+        animation.save('data/3d animation.gif', writer='pillow')
+        # plt.show()
 
 
 class Mesh:
