@@ -107,7 +107,7 @@ class Vessel:
         # plt.tight_layout()
         animation = FuncAnimation(fig, update, frames=range(len(self.cross_section_history)), interval=50)
         # To save the animation as a GIF, you can use the following line
-        # animation.save('stability curve.gif', writer='pillow')
+        animation.save('stability curve.gif', writer='pillow')
         plt.show()
 
     def stability_curve(self):
