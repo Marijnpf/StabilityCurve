@@ -1,7 +1,9 @@
-from stability_curve import Vessel
 from pathlib import Path
 import numpy as np
+from stability_curve import Vessel
 
-vessel = Vessel(Path('data/example_hull.stl'), 160, 20, 6, np.array([60, 0, 10]))
-vessel.stability_curve()
-vessel.animate_cross_section()
+
+if __name__ == '__main__':
+    vessel = Vessel(Path('data/example_hull.stl'), length=160, breadth=20, draft=6, center_of_gravity=np.array([60, 0, 10]))
+    vessel.stability_curve(heeling_range=[-5, 100], increment=2)
+    vessel.animate_cross_section()

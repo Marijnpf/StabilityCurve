@@ -3,7 +3,7 @@ import trimesh
 from trimesh import Trimesh
 from trimesh.path import Path2D
 from pathlib import Path
-from trimesh import transformations, intersections
+from trimesh import transformations
 from typing import Union, List
 import matplotlib.pyplot as plt
 from tqdm import tqdm
@@ -107,17 +107,17 @@ class Vessel:
         # plt.tight_layout()
         animation = FuncAnimation(fig, update, frames=range(len(self.cross_section_history)), interval=50)
         # To save the animation as a GIF, you can use the following line
-        animation.save('stability curve.gif', writer='pillow')
+        # animation.save('stability curve.gif', writer='pillow')
         plt.show()
 
-    def stability_curve(self):
+    def stability_curve(self, heeling_range: list, increment: float):
         """
         Method that calculates the GZ-curve for vessel
         """
 
         # Specify the heeling increment and range to iterate over
-        heeling_increment = 1
-        heeling_angles = np.arange(-5, 90 + heeling_increment, heeling_increment)
+        heeling_increment = increment
+        heeling_angles = np.arange(heeling_range[0], heeling_range[1] + heeling_increment, heeling_increment)
 
         # Create progress bar
         progress_bar = tqdm(total=len(heeling_angles), desc='Calculating GZ-curve', unit='angle')
@@ -142,7 +142,9 @@ class Vessel:
 
         # Close the progress bar
         progress_bar.close()
+
         self.righting_arm_history = [heeling_angles, gz_array]
+        return self.righting_arm_history
 
     def cross_section(
             self,
