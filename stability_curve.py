@@ -32,7 +32,7 @@ class Vessel:
         _, self.abovewater_vessel = self.mesh.slice_mesh([0, 0, self.draft * 1e3], [0, 0, 1])
         self.center_of_gravity = center_of_gravity
         self.heel_counter = 0
-
+        # plot_3d_mesh([self.abovewater_vessel, self.underwater_vessel])
         self.center_of_floatation = self.waterline.centroid * 1e-3  # [m]
         self.center_of_buoyancy = self.underwater_vessel.center_mass * 1e-3  # [m]
         self.GZt = self.center_of_buoyancy[1] - self.center_of_gravity[1]  # Horizontal distance between B and G
@@ -74,7 +74,7 @@ class Vessel:
 
     def animate_cross_section(self):
 
-        fig, ax = plt.subplots(1, 2, figsize=(8, 4))
+        fig, ax = plt.subplots(1, 2, figsize=(12, 6))
         margin = 10
 
         def update(frame):
@@ -84,7 +84,8 @@ class Vessel:
 
             ax[0].clear()
             ax[0].plot(self.righting_arm_history[0], self.righting_arm_history[1])
-            ax[0].scatter(self.righting_arm_history[0][frame], self.righting_arm_history[1][frame])
+            ax[0].scatter(self.righting_arm_history[0][frame], self.righting_arm_history[1][frame], color='red')
+            ax[0].axhline(0, color='black', linestyle='dashed')
             ax[0].set_xlabel('Heeling angle [deg]')
             ax[0].set_ylabel('Righting arm [m]')
             ax[0].grid(True)
@@ -100,10 +101,11 @@ class Vessel:
             ax[1].set_ylim(-self.breadth / 2 - margin, self.breadth / 2 + margin + self.draft)  # Set y-axis limits
             ax[1].grid(False)
             ax[1].set_aspect('equal', adjustable="datalim")
-
+            # plt.suptitle('Test', size=12)
             fig.canvas.draw()  # forcing the artist to redraw itself
 
-        animation = FuncAnimation(fig, update, frames=range(len(self.cross_section_history)), interval=30)
+        # plt.tight_layout()
+        animation = FuncAnimation(fig, update, frames=range(len(self.cross_section_history)), interval=50)
         # To save the animation as a GIF, you can use the following line
         # animation.save('stability curve.gif', writer='pillow')
         plt.show()
@@ -115,7 +117,7 @@ class Vessel:
 
         # Specify the heeling increment and range to iterate over
         heeling_increment = 1
-        heeling_angles = np.arange(0, 90 + heeling_increment, heeling_increment)
+        heeling_angles = np.arange(-5, 90 + heeling_increment, heeling_increment)
 
         # Create progress bar
         progress_bar = tqdm(total=len(heeling_angles), desc='Calculating GZ-curve', unit='angle')
