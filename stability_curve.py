@@ -30,17 +30,17 @@ def change_sign(
 
 class Vessel:
 
-    def __init__(self, mesh_path, length, breadth, draft, center_of_gravity):
+    def __init__(self, mesh_path: Path, length: float, breadth: float, draft: float, center_of_gravity: np.array
+                 ) -> None:
 
         self.mesh = Mesh(mesh_path)
         self.length = length
         self.breadth = breadth
         self.draft = draft
-        self.waterline, self.underwater_vessel = self.mesh.slice_mesh([0, 0, self.draft * 1e3], [0, 0, -1])
-        _, self.abovewater_vessel = self.mesh.slice_mesh([0, 0, self.draft * 1e3], [0, 0, 1])
+        self.waterline, self.underwater_vessel = self.mesh.clip_mesh([0, 0, self.draft * 1e3], [0, 0, -1])
+        _, self.abovewater_vessel = self.mesh.clip_mesh([0, 0, self.draft * 1e3], [0, 0, 1])
         self.center_of_gravity = center_of_gravity
         self.heel_counter = 0
-        # plot_3d_mesh([self.abovewater_vessel, self.underwater_vessel])
         self.center_of_floatation = self.waterline.centroid * 1e-3  # [m]
         self.center_of_buoyancy = self.underwater_vessel.center_mass * 1e-3  # [m]
         self.GZt = self.center_of_buoyancy[1] - self.center_of_gravity[1]  # Horizontal distance between B and G
@@ -49,7 +49,7 @@ class Vessel:
         self.cross_section_history = []
         self.righting_arm_history = []
 
-    def heel(self, angle, center):
+    def heel(self, angle: float, center: np.array):
 
         # Subtract the angle counter, to heel with the actual input angle
         angle = angle - self.heel_counter
@@ -72,9 +72,8 @@ class Vessel:
 
     def update(self):
 
-        self.waterline, self.underwater_vessel = self.mesh.slice_mesh([0, 0, self.draft * 1e3], [0, 0, -1])
-        _, self.abovewater_vessel = self.mesh.slice_mesh([0, 0, self.draft * 1e3], [0, 0, 1])
-        # plot_3d_mesh([self.underwater_vessel, self.abovewater_vessel])
+        self.waterline, self.underwater_vessel = self.mesh.clip_mesh([0, 0, self.draft * 1e3], [0, 0, -1])
+        _, self.abovewater_vessel = self.mesh.clip_mesh([0, 0, self.draft * 1e3], [0, 0, 1])
         self.center_of_floatation = self.waterline.centroid * 1e-3  # [m]
         self.center_of_buoyancy = self.underwater_vessel.center_mass * 1e-3  # [m]
         self.GZt = self.center_of_buoyancy[1] - self.center_of_gravity[1]  # Horizontal distance between B and G
@@ -82,7 +81,7 @@ class Vessel:
         self.cross_section_history.append(self.cross_section([self.length/2 * 1e3, 0, 0]))
         self.mesh_history.append([self.abovewater_vessel, self.underwater_vessel])
 
-    def animate_cross_section(self):
+    def animate_cross_section(self, save_as: str = None):
 
         fig, ax = plt.subplots(1, 2, figsize=(12, 6))
         margin = 10
@@ -116,10 +115,11 @@ class Vessel:
             fig.canvas.draw()
 
         animation = FuncAnimation(fig, update, frames=range(len(self.cross_section_history)), interval=50)
-        animation.save('data/stability curve.gif', writer='pillow')
+        if save_as is not None:
+            animation.save(save_as, writer='pillow')
         plt.show()
 
-    def stability_curve(self, heeling_range: list, increment: float):
+    def stability_curve(self, heeling_range: list, increment: float) -> List[np.array]:
         """
         Method that calculates the GZ-curve for vessel
         """
@@ -171,8 +171,8 @@ class Vessel:
         plane_normal = [1, 0, 0]
 
         # Make cross-section on the specified plane origin and normal
-        cross_section, _ = self.mesh.slice_mesh(plane_origin=plane_origin,
-                                                plane_normal=plane_normal)
+        cross_section, _ = self.mesh.clip_mesh(plane_origin=plane_origin,
+                                               plane_normal=plane_normal)
 
         return [cross_section, self.center_of_gravity, self.center_of_buoyancy]
 
@@ -205,13 +205,13 @@ class Mesh:
 
         self.mesh = trimesh.load(mesh_path)
 
-    def slice_mesh(
+    def clip_mesh(
             self,
             plane_origin: list[float],
             plane_normal: list[float],
     ) -> Union[tuple, Path2D]:
         """
-        Method to slice the mesh at a specific location and orientation
+        Method to clip the mesh at a specific location and orientation
         :param plane_origin: coordinate containing the location of the slice
         :param plane_normal: direction of the slice
         :return: Path2D object containing the intersection and Trimesh object containing the sliced object
@@ -223,12 +223,12 @@ class Mesh:
                                                     heights=[0])
 
         # Calls Trimesh method that slices the mesh and caps it
-        sliced_half_closed = trimesh.intersections.slice_mesh_plane(mesh=self.mesh,
+        clipped_half_closed = trimesh.intersections.slice_mesh_plane(mesh=self.mesh,
                                                                     plane_normal=plane_normal,
                                                                     plane_origin=plane_origin,
                                                                     cap=True)
 
-        return intersection[0], sliced_half_closed
+        return intersection[0], clipped_half_closed
 
     def rotate_mesh(
             self,
@@ -297,11 +297,11 @@ def rotate_roll(
         center: np.ndarray
 ) -> Union[np.ndarray, None]:
     """
-    Roll a coordinate
+    Rotate a coordinate around the x-axis
 
-    :param point: Coordinate to roll
-    :param angle: Angle to roll
-    :param center: Coordinate to roll around
+    :param point: Coordinate to rotate
+    :param angle: Angle to rotate
+    :param center: Coordinate to rotate around
 
     :return: The rotated coordinate
     """
