@@ -4,8 +4,12 @@ from stability_curve import Vessel
 
 
 if __name__ == '__main__':
+
     vessel = Vessel(Path('data/example_hull_quads.stl'), length=160, breadth=20, draft=6,
                     center_of_gravity=np.array([60, 0, 10]))
+    hs_data = vessel.compute_hydrostatics(1.025)
     vessel.stability_curve(heeling_range=[-5, 90], increment=1)
     # vessel.animate_3d_mesh()
-    vessel.animate_cross_section()
+    # vessel.animate_cross_section()
+
+    print(1)

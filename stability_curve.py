@@ -49,6 +49,19 @@ class Vessel:
         self.cross_section_history = []
         self.righting_arm_history = []
 
+    def compute_hydrostatics(self, rho_water):
+
+        hs_data = dict()
+        hs_data['waterplane_area'] = self.waterline.area * 1e-6
+        hs_data['waterplane_center'] = self.waterline.centroid * 1e-3
+        hs_data['wetted_surface_area'] = 0
+        hs_data['displacement'] = self.underwater_vessel.volume * rho_water * 1e-9
+        hs_data['cog'] = self.center_of_gravity
+        hs_data['cob'] = self.center_of_buoyancy
+
+        return hs_data
+
+
     def heel(self, angle: float, center: np.array):
 
         # Subtract the angle counter, to heel with the actual input angle
@@ -319,3 +332,5 @@ def rotate_roll(
 
     # Return rotated coordinate
     return final_rotated_point
+
+
